@@ -7,6 +7,9 @@ import {
   Text,
   TextInput,
 } from 'react-native';
+import { Link } from 'react-router-native';
+import { connect } from 'react-redux';
+import { handleLogin, registerUser } from '../actions/auth';
 
 class Auth extends React.Component {
   state = {
@@ -17,7 +20,13 @@ class Auth extends React.Component {
   }
 
   handleSubmit = () => {
-    //TODO
+    const { dispatch, type, history } = this.props;
+    const { email, password, passwordConfirmation } = this.state
+    if (type === 'Register')
+      dispatch(registerUser(email, password, passwordConfirmation, history))
+    else
+      dispatch(handleLogin(email, password, history))
+
     this.setState({
       email: '',
       password: '',
@@ -57,6 +66,8 @@ class Auth extends React.Component {
       error,
     } = this.state
 
+    const { type } = this.props;
+
     const disabled = this.canSubmit();
     return (
       <KeyboardAvoidingView
@@ -66,7 +77,7 @@ class Auth extends React.Component {
         { error !== '' &&
           <Text style={styles.error}>{error}</Text>
         }
-        <Text style={styles.title}>{ this.props.type }</Text>
+        <Text style={styles.title}>{ type }</Text>
         <TextInput
           style={styles.input}
           placeholder="Email"
@@ -86,7 +97,7 @@ class Auth extends React.Component {
           value={password}
           onChangeText={ (password) => this.setState({ password }) }
         />
-        { this.props.type === 'Register' &&
+        { type === 'Register' &&
           <TextInput
             style={styles.input}
             placeholder="password confirmation"
@@ -100,14 +111,23 @@ class Auth extends React.Component {
         <TouchableOpacity
           onPress={ disabled ? f => f : this.handleSubmit }
         >
-          <Text style={styles.button}>{this.props.type}</Text>
+          <Text style={styles.button}>{type}</Text>
         </TouchableOpacity>
+        <Link to={ type === 'Register' ? '/login' : '/register' }>
+          <Text style={styles.link}>
+            { type === 'Register' ? 'Login' : 'Register' }
+          </Text>
+        </Link>
       </KeyboardAvoidingView>
     )
   }
 }
 
 const styles = StyleSheet.create({
+  link: {
+    color: 'lightblue',
+    fontSize: 20,
+  },
   container: {
     backgroundColor: 'black',
     flex: 1,
@@ -143,4 +163,4 @@ const styles = StyleSheet.create({
   }
 })
 
-export default Auth
+export default connect()(Auth)
